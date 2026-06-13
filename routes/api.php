@@ -7,7 +7,6 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Products\ProductController; 
 use App\Http\Controllers\Clientes\ClienteController;
 use App\Http\Controllers\Facturas\FacturaController;
 use App\Http\Controllers\Reportes\ReporteController;
@@ -68,3 +67,4 @@ Route::middleware('auth:api')->group(function () {
     Route::get('reports/dashboard', [ReporteController::class, 'getDashboardStats']);
     
 });
+});         
