@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -30,11 +29,18 @@ class AuthTest extends TestCase
                         'id',
                         'name',
                         'email',
-                        'role',
+                        'roles',
+                        'permissions',
                         'company',
                     ],
                 ],
-            ]);
+            ])
+            ->assertJsonPath('data.user.roles', ['admin']);
+
+        $permissions = $response->json('data.user.permissions');
+        $this->assertContains('clients.view', $permissions);
+        $this->assertContains('clients.create', $permissions);
+        $this->assertContains('users.manage', $permissions);
 
         $token = $response->json('data.access_token');
 
@@ -43,7 +49,27 @@ class AuthTest extends TestCase
         ])
             ->assertOk()
             ->assertJsonPath('data.email', 'admin@edwin.com')
-            ->assertJsonPath('data.company.name', 'Distribuciones Edwin');
+            ->assertJsonPath('data.company.name', 'Distribuciones Edwin')
+            ->assertJsonPath('data.roles', ['admin']);
+    }
+
+    public function test_vendedor_has_limited_permissions(): void
+    {
+        $this->seed();
+
+        $response = $this->postJson('/api/auth/login', [
+            'email' => 'vendedor@edwin.com',
+            'password' => 'password',
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('data.user.roles', ['vendedor']);
+
+        $permissions = $response->json('data.user.permissions');
+
+        $this->assertContains('invoices.create', $permissions);
+        $this->assertNotContains('users.manage', $permissions);
+        $this->assertNotContains('products.create', $permissions);
     }
 
     public function test_login_fails_with_invalid_credentials(): void

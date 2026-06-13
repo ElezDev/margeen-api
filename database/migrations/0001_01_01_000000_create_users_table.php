@@ -27,11 +27,17 @@ return new class extends Migration
             $table->string('name');
             $table->string('email');
             $table->string('password');
-            $table->string('role', 20)->default('vendedor');
+            $table->string('document')->nullable();
+            $table->string('phone', 20)->nullable();
+            $table->string('address')->nullable();
+            $table->string('avatar_path')->nullable();
+            $table->text('notes')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->timestamp('last_login_at')->nullable();
             $table->timestamps();
 
             $table->unique(['company_id', 'email']);
+            $table->unique(['company_id', 'document']);
         });
 
         Schema::create('refresh_tokens', function (Blueprint $table) {

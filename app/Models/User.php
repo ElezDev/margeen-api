@@ -2,27 +2,35 @@
 
 namespace App\Models;
 
-use App\Enums\UserRole;
+use App\Enums\Role as RoleEnum;
+use App\Models\Concerns\BelongsToCompany;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use BelongsToCompany, HasFactory, HasRoles, Notifiable;
+
+    protected string $guard_name = 'api';
 
     protected $fillable = [
         'company_id',
         'name',
         'email',
         'password',
-        'role',
+        'document',
+        'phone',
+        'address',
+        'avatar_path',
+        'notes',
         'is_active',
+        'last_login_at',
     ];
 
     protected $hidden = [
@@ -32,15 +40,10 @@ class User extends Authenticatable implements JWTSubject
     protected function casts(): array
     {
         return [
-            'role' => UserRole::class,
             'is_active' => 'boolean',
             'password' => 'hashed',
+            'last_login_at' => 'datetime',
         ];
-    }
-
-    public function company(): BelongsTo
-    {
-        return $this->belongsTo(Company::class);
     }
 
     public function invoices(): HasMany
@@ -55,7 +58,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function isAdmin(): bool
     {
-        return $this->role->isAdmin();
+        return $this->hasRole(RoleEnum::Admin->value);
     }
 
     public function getJWTIdentifier(): mixed
@@ -67,7 +70,7 @@ class User extends Authenticatable implements JWTSubject
     {
         return [
             'company_id' => $this->company_id,
-            'role' => $this->role->value,
+            'roles' => $this->getRoleNames()->toArray(),
         ];
     }
 }

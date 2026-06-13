@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RefreshTokenRequest;
+use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\AuthService;
@@ -21,7 +22,7 @@ class AuthController extends Controller
     public function login(LoginRequest $request): JsonResponse
     {
         $user = User::query()
-            ->with('company')
+            ->with(['company', 'roles.permissions'])
             ->where('email', $request->validated('email'))
             ->first();
 
@@ -36,6 +37,8 @@ class AuthController extends Controller
                 'message' => 'Usuario inactivo.',
             ], 403);
         }
+
+        $user->update(['last_login_at' => now()]);
 
         $tokens = $this->authService->login($user);
 
@@ -72,9 +75,21 @@ class AuthController extends Controller
 
     public function me(Request $request): JsonResponse
     {
-        $user = $request->user()->load('company');
+        $user = $request->user()->load(['company', 'roles.permissions']);
 
         return response()->json([
+            'data' => UserResource::make($user),
+        ]);
+    }
+
+    public function updateProfile(UpdateProfileRequest $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->update($request->validated());
+        $user->load(['company', 'roles.permissions']);
+
+        return response()->json([
+            'message' => 'Perfil actualizado.',
             'data' => UserResource::make($user),
         ]);
     }

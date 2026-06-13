@@ -21,6 +21,7 @@ return new class extends Migration
             $table->decimal('total_cost', 12, 2)->default(0);
             $table->decimal('total_profit', 12, 2)->default(0);
             $table->text('notes')->nullable();
+            $table->string('pdf_path')->nullable();
             $table->timestamp('issued_at')->nullable();
             $table->timestamps();
 

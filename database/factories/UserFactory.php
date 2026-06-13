@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Enums\UserRole;
+use App\Enums\Role as RoleEnum;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,15 +22,27 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'password' => static::$password ??= Hash::make('password'),
-            'role' => UserRole::Vendedor,
+            'document' => fake()->unique()->numerify('##########'),
+            'phone' => fake()->numerify('3#########'),
+            'address' => fake()->address(),
+            'avatar_path' => null,
+            'notes' => null,
             'is_active' => true,
+            'last_login_at' => null,
         ];
     }
 
     public function admin(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'role' => UserRole::Admin,
-        ]);
+        return $this->afterCreating(function (User $user) {
+            $user->assignRole(RoleEnum::Admin->value);
+        });
+    }
+
+    public function vendedor(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $user->assignRole(RoleEnum::Vendedor->value);
+        });
     }
 }

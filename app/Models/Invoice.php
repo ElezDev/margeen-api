@@ -24,6 +24,7 @@ class Invoice extends Model
         'total_cost',
         'total_profit',
         'notes',
+        'pdf_path',
         'issued_at',
     ];
 

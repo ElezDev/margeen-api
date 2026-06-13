@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Enums\UserRole;
+use App\Enums\Role as RoleEnum;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -22,22 +22,30 @@ class CompanySeeder extends Seeder
             'next_invoice_number' => 1,
         ]);
 
-        User::query()->create([
+        $admin = User::query()->create([
             'company_id' => $company->id,
             'name' => 'Edwin Admin',
             'email' => 'admin@edwin.com',
             'password' => Hash::make('password'),
-            'role' => UserRole::Admin,
+            'document' => '1234567890',
+            'phone' => '3001112233',
+            'address' => 'Barrio El Centro, Sincelejo',
+            'notes' => 'Dueño del negocio',
             'is_active' => true,
         ]);
+        $admin->assignRole(RoleEnum::Admin->value);
 
-        User::query()->create([
+        $vendedor = User::query()->create([
             'company_id' => $company->id,
             'name' => 'Carlos Vendedor',
             'email' => 'vendedor@edwin.com',
             'password' => Hash::make('password'),
-            'role' => UserRole::Vendedor,
+            'document' => '9876543210',
+            'phone' => '3004445566',
+            'address' => 'Corozal, Sucre',
+            'notes' => 'Ruta zona norte',
             'is_active' => true,
         ]);
+        $vendedor->assignRole(RoleEnum::Vendedor->value);
     }
 }

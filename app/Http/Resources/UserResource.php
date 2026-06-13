@@ -14,8 +14,16 @@ class UserResource extends JsonResource
             'company_id' => $this->company_id,
             'name' => $this->name,
             'email' => $this->email,
-            'role' => $this->role->value,
+            'document' => $this->document,
+            'phone' => $this->phone,
+            'address' => $this->address,
+            'avatar_path' => $this->avatar_path,
+            'notes' => $this->notes,
+            'roles' => $this->getRoleNames(),
+            'permissions' => $this->getAllPermissions()->pluck('name'),
             'is_active' => $this->is_active,
+            'last_login_at' => $this->last_login_at?->toIso8601String(),
+            'created_at' => $this->created_at?->toIso8601String(),
             'company' => CompanyResource::make($this->whenLoaded('company')),
         ];
     }
