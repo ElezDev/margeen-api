@@ -17,31 +17,43 @@ class DemoDataSeeder extends Seeder
             return;
         }
 
-        Client::query()->create([
-            'company_id' => $company->id,
-            'name' => 'María López',
-            'document' => '1088123456',
-            'phone' => '3005556677',
-            'address' => 'Corozal, Sucre',
-            'notes' => 'Cliente frecuente',
-        ]);
+        Client::query()->firstOrCreate(
+            [
+                'company_id' => $company->id,
+                'document' => '1088123456',
+            ],
+            [
+                'name' => 'María López',
+                'phone' => '3005556677',
+                'address' => 'Corozal, Sucre',
+                'notes' => 'Cliente frecuente',
+            ]
+        );
 
-        Product::query()->create([
-            'company_id' => $company->id,
-            'name' => 'Arroz premium',
-            'unit' => 'arroba',
-            'cost_price' => 18000,
-            'sale_price' => 24000,
-            'is_active' => true,
-        ]);
+        Product::query()->firstOrCreate(
+            [
+                'company_id' => $company->id,
+                'name' => 'Arroz premium',
+            ],
+            [
+                'unit' => 'arroba',
+                'cost_price' => 18000,
+                'sale_price' => 24000,
+                'is_active' => true,
+            ]
+        );
 
-        Product::query()->create([
-            'company_id' => $company->id,
-            'name' => 'Aceite vegetal',
-            'unit' => 'galón',
-            'cost_price' => 12000,
-            'sale_price' => 15500,
-            'is_active' => true,
-        ]);
+        Product::query()->firstOrCreate(
+            [
+                'company_id' => $company->id,
+                'name' => 'Aceite vegetal',
+            ],
+            [
+                'unit' => 'galón',
+                'cost_price' => 12000,
+                'sale_price' => 15500,
+                'is_active' => true,
+            ]
+        );
     }
 }
