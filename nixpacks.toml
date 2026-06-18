@@ -1,11 +1,6 @@
-[phases.setup]
-nixPkgs = ["...", "nodejs_20"]
-
 [phases.build]
 cmds = [
     "composer install --no-dev --optimize-autoloader",
-    "npm ci --omit=dev",
-    "npm run build",
 ]
 
 [start]
