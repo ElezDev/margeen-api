@@ -13,7 +13,7 @@ class CompanySeeder extends Seeder
     public function run(): void
     {
         $company = Company::query()->create([
-            'name' => 'Distribuciones Edwin',
+            'name' => 'Distribuciones Margeen',
             'document' => '900123456',
             'phone' => '3001234567',
             'address' => 'Calle 10 #5-20, Sincelejo',
@@ -24,8 +24,8 @@ class CompanySeeder extends Seeder
 
         $admin = User::query()->create([
             'company_id' => $company->id,
-            'name' => 'Edwin Admin',
-            'email' => 'admin@edwin.com',
+            'name' => 'Ana Rodríguez',
+            'email' => 'admin@demo.com',
             'password' => Hash::make('password'),
             'document' => '1234567890',
             'phone' => '3001112233',
@@ -38,7 +38,7 @@ class CompanySeeder extends Seeder
         $vendedor = User::query()->create([
             'company_id' => $company->id,
             'name' => 'Carlos Vendedor',
-            'email' => 'vendedor@edwin.com',
+            'email' => 'vendedor@demo.com',
             'password' => Hash::make('password'),
             'document' => '9876543210',
             'phone' => '3004445566',

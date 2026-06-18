@@ -35,7 +35,7 @@ class ReportTest extends TestCase
 
         $client = Client::query()->first();
         $product = Product::query()->first();
-        $token = $this->tokenFor('vendedor@edwin.com');
+        $token = $this->tokenFor('vendedor@demo.com');
 
         $this->postJson('/api/invoices', [
             'client_id' => $client->id,
@@ -66,8 +66,8 @@ class ReportTest extends TestCase
 
         $client = Client::query()->first();
         $product = Product::query()->first();
-        $adminToken = $this->tokenFor('admin@edwin.com');
-        $vendedorToken = $this->tokenFor('vendedor@edwin.com');
+        $adminToken = $this->tokenFor('admin@demo.com');
+        $vendedorToken = $this->tokenFor('vendedor@demo.com');
 
         $this->postJson('/api/invoices', [
             'client_id' => $client->id,
@@ -90,8 +90,8 @@ class ReportTest extends TestCase
 
         $client = Client::query()->first();
         $product = Product::query()->first();
-        $vendedor = User::query()->where('email', 'vendedor@edwin.com')->firstOrFail();
-        $vendedorToken = $this->tokenFor('vendedor@edwin.com');
+        $vendedor = User::query()->where('email', 'vendedor@demo.com')->firstOrFail();
+        $vendedorToken = $this->tokenFor('vendedor@demo.com');
 
         $this->postJson('/api/invoices', [
             'client_id' => $client->id,
@@ -101,7 +101,7 @@ class ReportTest extends TestCase
         Invoice::query()->create([
             'company_id' => $vendedor->company_id,
             'client_id' => $client->id,
-            'user_id' => User::query()->where('email', 'admin@edwin.com')->value('id'),
+            'user_id' => User::query()->where('email', 'admin@demo.com')->value('id'),
             'number' => 'FAC-0099',
             'status' => InvoiceStatus::Issued,
             'subtotal' => 1000,

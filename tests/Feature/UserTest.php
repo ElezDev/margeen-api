@@ -13,7 +13,7 @@ class UserTest extends TestCase
     private function loginAsAdmin(): string
     {
         $response = $this->postJson('/api/auth/login', [
-            'email' => 'admin@edwin.com',
+            'email' => 'admin@demo.com',
             'password' => 'password',
         ]);
 
@@ -25,7 +25,7 @@ class UserTest extends TestCase
         $this->seed();
 
         $this->postJson('/api/auth/login', [
-            'email' => 'admin@edwin.com',
+            'email' => 'admin@demo.com',
             'password' => 'password',
         ])
             ->assertOk()
@@ -58,7 +58,7 @@ class UserTest extends TestCase
 
         $this->postJson('/api/users', [
             'name' => 'Ana Vendedora',
-            'email' => 'ana@edwin.com',
+            'email' => 'ana@demo.com',
             'password' => 'password123',
             'document' => '1122334455',
             'phone' => '3007776655',
@@ -79,7 +79,7 @@ class UserTest extends TestCase
         $this->seed();
 
         $login = $this->postJson('/api/auth/login', [
-            'email' => 'vendedor@edwin.com',
+            'email' => 'vendedor@demo.com',
             'password' => 'password',
         ]);
 
@@ -92,7 +92,7 @@ class UserTest extends TestCase
     {
         $this->seed();
         $token = $this->loginAsAdmin();
-        $admin = User::query()->where('email', 'admin@edwin.com')->first();
+        $admin = User::query()->where('email', 'admin@demo.com')->first();
 
         $this->deleteJson("/api/users/{$admin->id}", [], [
             'Authorization' => "Bearer {$token}",

@@ -22,7 +22,7 @@ class ProductTest extends TestCase
     public function test_vendedor_can_list_and_search_products(): void
     {
         $this->seed();
-        $token = $this->tokenFor('vendedor@edwin.com');
+        $token = $this->tokenFor('vendedor@demo.com');
 
         $this->getJson('/api/products?q=arroz', $this->bearer($token))
             ->assertOk()
@@ -37,7 +37,7 @@ class ProductTest extends TestCase
     public function test_admin_can_create_and_update_product(): void
     {
         $this->seed();
-        $token = $this->tokenFor('admin@edwin.com');
+        $token = $this->tokenFor('admin@demo.com');
 
         $this->postJson('/api/products', [
             'name' => 'Frijol rojo',
@@ -60,7 +60,7 @@ class ProductTest extends TestCase
     public function test_vendedor_cannot_create_product(): void
     {
         $this->seed();
-        $token = $this->tokenFor('vendedor@edwin.com');
+        $token = $this->tokenFor('vendedor@demo.com');
 
         $this->postJson('/api/products', [
             'name' => 'Test',

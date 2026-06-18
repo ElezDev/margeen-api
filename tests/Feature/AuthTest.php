@@ -14,7 +14,7 @@ class AuthTest extends TestCase
         $this->seed();
 
         $response = $this->postJson('/api/auth/login', [
-            'email' => 'admin@edwin.com',
+            'email' => 'admin@demo.com',
             'password' => 'password',
         ]);
 
@@ -48,8 +48,8 @@ class AuthTest extends TestCase
             'Authorization' => "Bearer {$token}",
         ])
             ->assertOk()
-            ->assertJsonPath('data.email', 'admin@edwin.com')
-            ->assertJsonPath('data.company.name', 'Distribuciones Edwin')
+            ->assertJsonPath('data.email', 'admin@demo.com')
+            ->assertJsonPath('data.company.name', 'Distribuciones Margeen')
             ->assertJsonPath('data.roles', ['admin']);
     }
 
@@ -58,7 +58,7 @@ class AuthTest extends TestCase
         $this->seed();
 
         $response = $this->postJson('/api/auth/login', [
-            'email' => 'vendedor@edwin.com',
+            'email' => 'vendedor@demo.com',
             'password' => 'password',
         ]);
 
@@ -77,7 +77,7 @@ class AuthTest extends TestCase
         $this->seed();
 
         $this->postJson('/api/auth/login', [
-            'email' => 'admin@edwin.com',
+            'email' => 'admin@demo.com',
             'password' => 'wrong-password',
         ])->assertUnauthorized();
     }
@@ -87,7 +87,7 @@ class AuthTest extends TestCase
         $this->seed();
 
         $login = $this->postJson('/api/auth/login', [
-            'email' => 'vendedor@edwin.com',
+            'email' => 'vendedor@demo.com',
             'password' => 'password',
         ])->assertOk();
 

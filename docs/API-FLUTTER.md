@@ -49,7 +49,7 @@ En Dio: `responseType: ResponseType.bytes`
 **Body:**
 ```json
 {
-  "email": "admin@edwin.com",
+  "email": "admin@demo.com",
   "password": "password"
 }
 ```
@@ -116,7 +116,7 @@ Usar al abrir la app si hay token guardado.
 **Body** (todos opcionales):
 ```json
 {
-  "name": "Edwin Admin",
+  "name": "Ana Rodríguez",
   "document": "1234567890",
   "phone": "3001112233",
   "address": "Sincelejo",
@@ -143,8 +143,8 @@ Usar al abrir la app si hay token guardado.
 {
   "id": 1,
   "company_id": 1,
-  "name": "Edwin Admin",
-  "email": "admin@edwin.com",
+  "name": "Ana Rodríguez",
+  "email": "admin@demo.com",
   "document": "1234567890",
   "phone": "3001112233",
   "address": "Barrio El Centro",
@@ -161,7 +161,7 @@ Usar al abrir la app si hay token guardado.
   "last_login_at": "2026-06-10T12:00:00+00:00",
   "company": {
     "id": 1,
-    "name": "Distribuciones Edwin",
+    "name": "Distribuciones Margeen",
     "document": "900123456",
     "phone": "3001234567",
     "address": "Calle 10 #5-20",
@@ -312,7 +312,7 @@ Sin body. Marca `status: cancelled`.
   "issued_at": "2026-06-10T15:00:00+00:00",
   "client": {
     "id": 1,
-    "name": "Edwin Pérez",
+    "name": "María López",
     "phone": "3005556677"
   },
   "seller": {
@@ -356,7 +356,7 @@ Requiere permiso `users.manage`.
 ```json
 {
   "name": "Ana Vendedora",
-  "email": "ana@edwin.com",
+  "email": "ana@demo.com",
   "password": "password123",
   "document": "1122334455",
   "phone": "3007776655",
@@ -387,14 +387,14 @@ Requiere permiso `users.manage`.
 
 | Param | Ejemplo | Descripción |
 |-------|---------|-------------|
-| `q` | `edwin` | Busca en nombre, documento y teléfono |
+| `q` | `maria` | Busca en nombre, documento y teléfono |
 | `per_page` | `20` | Resultados por página |
 | `page` | `2` | Paginación |
 
 **Ejemplos:**
 ```
 GET /clients              → todos
-GET /clients?q=edwin      → filtrar "Edwin Pérez"
+GET /clients?q=maria      → filtrar "María López"
 GET /clients?q=3005         → buscar por teléfono
 ```
 
@@ -404,7 +404,7 @@ GET /clients?q=3005         → buscar por teléfono
   "data": [
     {
       "id": 1,
-      "name": "Edwin Pérez",
+      "name": "María López",
       "document": "1088123456",
       "phone": "3005556677",
       "address": "Corozal, Sucre",
@@ -512,13 +512,13 @@ Vendedor: solo sus facturas. Admin: todas (`reports.view-all`).
       "profit_margin_percent": 25
     },
     "top_clients": [
-      { "client_id": 1, "client_name": "Edwin Pérez", "total_sales": "480000.00", "invoice_count": 2 }
+      { "client_id": 1, "client_name": "María López", "total_sales": "480000.00", "invoice_count": 2 }
     ],
     "top_products": [
       { "product_id": 1, "description": "Arroz premium", "total_quantity": "20.00", "total_sales": "480000.00", "total_profit": "120000.00" }
     ],
     "recent_invoices": [
-      { "id": 1, "number": "FAC-0001", "client_name": "Edwin Pérez", "total": "240000.00", "total_profit": "60000.00" }
+      { "id": 1, "number": "FAC-0001", "client_name": "María López", "total": "240000.00", "total_profit": "60000.00" }
     ]
   }
 }
@@ -569,9 +569,9 @@ NumberFormat.currency(locale: 'es_CO', symbol: '\$').format(total);
 ## Usuarios demo
 
 ```
-Admin:    admin@edwin.com    / password
-Vendedor: vendedor@edwin.com / password
+Admin:    admin@demo.com    / password
+Vendedor: vendedor@demo.com / password
 
-client_id  = 1  → Edwin Pérez
+client_id  = 1  → María López
 product_id = 1  → Arroz premium (arroba, costo 18000, venta 24000)
 ```

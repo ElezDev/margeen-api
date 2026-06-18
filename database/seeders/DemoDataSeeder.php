@@ -19,7 +19,7 @@ class DemoDataSeeder extends Seeder
 
         Client::query()->create([
             'company_id' => $company->id,
-            'name' => 'Edwin Pérez',
+            'name' => 'María López',
             'document' => '1088123456',
             'phone' => '3005556677',
             'address' => 'Corozal, Sucre',
