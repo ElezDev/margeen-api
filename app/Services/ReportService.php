@@ -95,9 +95,14 @@ class ReportService
                 'invoice_count' => (int) $totals->invoice_count,
                 'total_sales' => number_format((float) $totals->total_sales, 2, '.', ''),
                 'total_profit' => number_format((float) $totals->total_profit, 2, '.', ''),
-                'profit_margin_percent' => $totals->total_sales > 0
-                    ? round(((float) $totals->total_profit / (float) $totals->total_sales) * 100, 2)
-                    : 0,
+                'profit_margin_percent' => (float) $totals->total_sales > 0
+                    ? (float) number_format(
+                        ((float) $totals->total_profit / (float) $totals->total_sales) * 100,
+                        2,
+                        '.',
+                        ''
+                    )
+                    : 0.0,
             ],
             'top_clients' => $topClients,
             'top_products' => $topProducts,

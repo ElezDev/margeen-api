@@ -9,9 +9,14 @@ class InvoiceResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $profitMargin = $this->total > 0
-            ? round(($this->total_profit / $this->total) * 100, 2)
-            : 0;
+        $profitMargin = (float) $this->total > 0
+            ? (float) number_format(
+                ((float) $this->total_profit / (float) $this->total) * 100,
+                2,
+                '.',
+                ''
+            )
+            : 0.0;
 
         return [
             'id' => $this->id,
@@ -31,7 +36,7 @@ class InvoiceResource extends JsonResource
             'issued_at' => $this->issued_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
             'client' => ClientResource::make($this->whenLoaded('client')),
-            'seller' => UserResource::make($this->whenLoaded('seller')),
+            'seller' => SellerResource::make($this->whenLoaded('seller')),
             'items' => InvoiceItemResource::collection($this->whenLoaded('items')),
         ];
     }
