@@ -20,7 +20,6 @@
         .totals { width: 280px; margin-left: auto; margin-top: 16px; }
         .totals td { padding: 5px 8px; }
         .totals .right { text-align: right; }
-        .totals .profit { font-weight: bold; color: #16a34a; font-size: 14px; }
         .totals .grand { font-weight: bold; font-size: 14px; border-top: 2px solid #2563eb; }
         .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #e2e8f0; color: #888; font-size: 10px; text-align: center; }
     </style>
@@ -87,7 +86,6 @@
         <tr><td>Descuento</td><td class="right">-${{ number_format($invoice->discount, 0, ',', '.') }}</td></tr>
         @endif
         <tr class="grand"><td>Total</td><td class="right">${{ number_format($invoice->total, 0, ',', '.') }}</td></tr>
-        <tr class="profit"><td>Ganancia</td><td class="right">${{ number_format($invoice->total_profit, 0, ',', '.') }}</td></tr>
     </table>
 
     @if($invoice->notes)
