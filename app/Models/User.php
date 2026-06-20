@@ -61,6 +61,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasRole(RoleEnum::Admin->value);
     }
 
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole(RoleEnum::SuperAdmin->value);
+    }
+
     public function getJWTIdentifier(): mixed
     {
         return $this->getKey();

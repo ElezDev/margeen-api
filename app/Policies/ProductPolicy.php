@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Enums\Permission as PermissionEnum;
 use App\Models\Product;
 use App\Models\User;
+use App\Support\Tenant;
 
 class ProductPolicy
 {
@@ -15,7 +16,7 @@ class ProductPolicy
 
     public function view(User $user, Product $product): bool
     {
-        return $product->company_id === $user->company_id
+        return Tenant::belongsToTenant($product)
             && $user->can(PermissionEnum::ProductsView->value);
     }
 
@@ -26,13 +27,13 @@ class ProductPolicy
 
     public function update(User $user, Product $product): bool
     {
-        return $product->company_id === $user->company_id
+        return Tenant::belongsToTenant($product)
             && $user->can(PermissionEnum::ProductsUpdate->value);
     }
 
     public function delete(User $user, Product $product): bool
     {
-        return $product->company_id === $user->company_id
+        return Tenant::belongsToTenant($product)
             && $user->can(PermissionEnum::ProductsDelete->value);
     }
 }

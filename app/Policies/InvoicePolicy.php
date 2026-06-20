@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Enums\Permission as PermissionEnum;
 use App\Models\Invoice;
 use App\Models\User;
+use App\Support\Tenant;
 
 class InvoicePolicy
 {
@@ -16,11 +17,11 @@ class InvoicePolicy
 
     public function view(User $user, Invoice $invoice): bool
     {
-        if ($invoice->company_id !== $user->company_id) {
+        if (! Tenant::belongsToTenant($invoice)) {
             return false;
         }
 
-        if ($user->can(PermissionEnum::InvoicesViewAll->value)) {
+        if (Tenant::isOverride() || $user->can(PermissionEnum::InvoicesViewAll->value)) {
             return true;
         }
 
@@ -35,7 +36,7 @@ class InvoicePolicy
 
     public function cancel(User $user, Invoice $invoice): bool
     {
-        return $invoice->company_id === $user->company_id
+        return Tenant::belongsToTenant($invoice)
             && $user->hasPermissionTo(PermissionEnum::InvoicesCancel->value, 'api');
     }
 

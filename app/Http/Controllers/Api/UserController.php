@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\Role as RoleEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Users\StoreUserRequest;
 use App\Http\Requests\Users\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Support\Tenant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -17,7 +17,7 @@ class UserController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $users = User::query()
-            ->forCompany($request->user()->company_id)
+            ->forCompany(Tenant::companyId($request))
             ->with('roles.permissions')
             ->orderBy('name')
             ->get();
@@ -28,16 +28,16 @@ class UserController extends Controller
     public function store(StoreUserRequest $request): JsonResponse
     {
         $data = $request->validated();
-        $role = RoleEnum::from($data['role']);
+        $role = $data['role'];
         unset($data['role']);
 
         $user = User::query()->create([
             ...$data,
-            'company_id' => $request->user()->company_id,
+            'company_id' => Tenant::companyId($request),
             'is_active' => $data['is_active'] ?? true,
         ]);
 
-        $user->assignRole($role->value);
+        $user->assignRole($role);
         $user->load('roles.permissions');
 
         return response()->json([
@@ -64,7 +64,7 @@ class UserController extends Controller
         $data = $request->validated();
 
         if (isset($data['role'])) {
-            $user->syncRoles([RoleEnum::from($data['role'])->value]);
+            $user->syncRoles([$data['role']]);
             unset($data['role']);
         }
 
@@ -96,7 +96,7 @@ class UserController extends Controller
 
     private function ensureSameCompany(Request $request, User $user): void
     {
-        if ($user->company_id !== $request->user()->company_id) {
+        if (! Tenant::belongsToTenant($user, $request)) {
             abort(404);
         }
     }

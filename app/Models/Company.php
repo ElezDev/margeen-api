@@ -16,6 +16,8 @@ class Company extends Model
         'phone',
         'address',
         'logo_path',
+        'notes',
+        'is_active',
         'default_margin_percent',
         'invoice_prefix',
         'next_invoice_number',
@@ -26,6 +28,7 @@ class Company extends Model
         return [
             'default_margin_percent' => 'decimal:2',
             'next_invoice_number' => 'integer',
+            'is_active' => 'boolean',
         ];
     }
 

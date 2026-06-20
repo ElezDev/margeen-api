@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\User;
+use App\Support\Tenant;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -18,11 +19,11 @@ class ReportService
         $toDate = $to ? Carbon::parse($to)->endOfDay() : now()->endOfDay();
 
         $invoiceQuery = Invoice::query()
-            ->forCompany($user->company_id)
+            ->forCompany(Tenant::companyId())
             ->where('status', InvoiceStatus::Issued)
             ->whereBetween('issued_at', [$fromDate, $toDate]);
 
-        if (! $user->can('reports.view-all')) {
+        if (! $user->can('reports.view-all') && ! Tenant::isOverride()) {
             $invoiceQuery->where('user_id', $user->id);
         }
 
@@ -86,6 +87,30 @@ class ReportService
                 'issued_at' => $invoice->issued_at?->toIso8601String(),
             ]);
 
+        $dailyRows = (clone $invoiceQuery)
+            ->selectRaw('DATE(issued_at) as date, COUNT(*) as invoice_count, COALESCE(SUM(total), 0) as total_sales, COALESCE(SUM(total_profit), 0) as total_profit')
+            ->groupBy(DB::raw('DATE(issued_at)'))
+            ->orderBy('date')
+            ->get()
+            ->keyBy('date');
+
+        $salesByDay = [];
+        $cursor = $fromDate->copy()->startOfDay();
+
+        while ($cursor <= $toDate) {
+            $dateStr = $cursor->toDateString();
+            $row = $dailyRows->get($dateStr);
+
+            $salesByDay[] = [
+                'date' => $dateStr,
+                'invoice_count' => (int) ($row->invoice_count ?? 0),
+                'total_sales' => number_format((float) ($row->total_sales ?? 0), 2, '.', ''),
+                'total_profit' => number_format((float) ($row->total_profit ?? 0), 2, '.', ''),
+            ];
+
+            $cursor->addDay();
+        }
+
         return [
             'period' => [
                 'from' => $fromDate->toDateString(),
@@ -106,6 +131,7 @@ class ReportService
             ],
             'top_clients' => $topClients,
             'top_products' => $topProducts,
+            'sales_by_day' => $salesByDay,
             'recent_invoices' => $recentInvoices,
         ];
     }

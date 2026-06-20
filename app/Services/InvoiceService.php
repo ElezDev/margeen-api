@@ -17,10 +17,11 @@ class InvoiceService
         private readonly InvoicePdfService $pdfService
     ) {}
 
-    public function create(User $seller, array $data): Invoice
+    public function create(User $seller, array $data, ?int $companyId = null): Invoice
     {
-        return DB::transaction(function () use ($seller, $data) {
-            $company = Company::query()->lockForUpdate()->findOrFail($seller->company_id);
+        return DB::transaction(function () use ($seller, $data, $companyId) {
+            $companyId = $companyId ?? $seller->company_id;
+            $company = Company::query()->lockForUpdate()->findOrFail($companyId);
 
             $client = Client::query()
                 ->forCompany($company->id)

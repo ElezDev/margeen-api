@@ -53,6 +53,7 @@ class ReportTest extends TestCase
                 'data' => [
                     'period',
                     'summary',
+                    'sales_by_day',
                     'top_clients',
                     'top_products',
                     'recent_invoices',

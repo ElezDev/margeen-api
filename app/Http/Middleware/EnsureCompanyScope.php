@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\Tenant;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,7 +21,7 @@ class EnsureCompanyScope
             abort(403, 'Usuario inactivo.');
         }
 
-        $request->attributes->set('company_id', $user->company_id);
+        Tenant::resolve($request);
 
         return $next($request);
     }

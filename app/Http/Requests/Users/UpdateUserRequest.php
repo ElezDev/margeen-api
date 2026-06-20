@@ -2,10 +2,9 @@
 
 namespace App\Http\Requests\Users;
 
-use App\Enums\Role as RoleEnum;
+use App\Support\Tenant;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Enum;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -16,7 +15,7 @@ class UpdateUserRequest extends FormRequest
 
     public function rules(): array
     {
-        $companyId = $this->user()->company_id;
+        $companyId = Tenant::companyId($this);
         $userId = $this->route('user')?->id;
 
         return [
@@ -43,7 +42,12 @@ class UpdateUserRequest extends FormRequest
             'address' => ['sometimes', 'nullable', 'string', 'max:255'],
             'avatar_path' => ['sometimes', 'nullable', 'string', 'max:255'],
             'notes' => ['sometimes', 'nullable', 'string', 'max:1000'],
-            'role' => ['sometimes', new Enum(RoleEnum::class)],
+            'role' => [
+                'sometimes',
+                'string',
+                Rule::exists('roles', 'name')->where('guard_name', 'api'),
+                Rule::notIn(['super_admin']),
+            ],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Invoices\StoreInvoiceRequest;
 use App\Http\Resources\InvoiceResource;
 use App\Models\Invoice;
+use App\Support\Tenant;
 use App\Services\InvoicePdfService;
 use App\Services\InvoiceService;
 use Illuminate\Http\JsonResponse;
@@ -25,11 +26,11 @@ class InvoiceController extends Controller
         $this->authorize('viewAny', Invoice::class);
 
         $query = Invoice::query()
-            ->forCompany($request->user()->company_id)
+            ->forCompany(Tenant::companyId($request))
             ->with(['client', 'seller', 'items.product'])
             ->orderByDesc('issued_at');
 
-        if (! $request->user()->isAdmin()) {
+        if (! $request->user()->isAdmin() && ! Tenant::isOverride($request)) {
             $query->where('user_id', $request->user()->id);
         }
 
@@ -49,14 +50,17 @@ class InvoiceController extends Controller
             $query->whereDate('issued_at', '<=', $request->date('to'));
         }
 
-        return InvoiceResource::collection($query->paginate(20));
+        return InvoiceResource::collection(
+            $query->paginate($request->integer('per_page', 20))
+        );
     }
 
     public function store(StoreInvoiceRequest $request): JsonResponse
     {
         $invoice = $this->invoiceService->create(
             $request->user(),
-            $request->validated()
+            $request->validated(),
+            Tenant::companyId($request),
         );
 
         return response()->json([
@@ -106,7 +110,7 @@ class InvoiceController extends Controller
 
     private function ensureSameCompany(Request $request, Invoice $invoice): void
     {
-        if ($invoice->company_id !== $request->user()->company_id) {
+        if (! Tenant::belongsToTenant($invoice, $request)) {
             abort(404);
         }
     }

@@ -20,11 +20,19 @@ class RoleAndPermissionSeeder extends Seeder
         }
 
         $admin = Role::findOrCreate(RoleEnum::Admin->value, 'api');
-        $admin->syncPermissions(PermissionEnum::values());
+        $admin->syncPermissions(array_values(array_filter(
+            PermissionEnum::values(),
+            fn (string $permission) => $permission !== PermissionEnum::PlatformManage->value
+        )));
 
         $vendedor = Role::findOrCreate(RoleEnum::Vendedor->value, 'api');
         $vendedor->syncPermissions(
             array_map(fn (PermissionEnum $permission) => $permission->value, PermissionEnum::forVendedor())
         );
+
+        $superAdmin = Role::findOrCreate(RoleEnum::SuperAdmin->value, 'api');
+        $superAdmin->syncPermissions([
+            PermissionEnum::PlatformManage->value,
+        ]);
     }
 }

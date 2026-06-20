@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Invoice;
+use App\Support\CompanyLogoStorage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 
@@ -18,6 +19,7 @@ class InvoicePdfService
             'client' => $invoice->client,
             'seller' => $invoice->seller,
             'items' => $invoice->items,
+            'logoDataUri' => $this->logoDataUri($invoice->company),
         ])->setPaper('letter');
 
         $path = sprintf(
@@ -33,11 +35,27 @@ class InvoicePdfService
 
     public function contents(Invoice $invoice): string
     {
-        if (! $invoice->pdf_path || ! Storage::disk('local')->exists($invoice->pdf_path)) {
-            $path = $this->generate($invoice);
+        $path = $this->generate($invoice);
+
+        if ($invoice->pdf_path !== $path) {
             $invoice->update(['pdf_path' => $path]);
         }
 
-        return Storage::disk('local')->get($invoice->pdf_path);
+        return Storage::disk('local')->get($path);
+    }
+
+    private function logoDataUri($company): ?string
+    {
+        app(PlatformCompanyService::class)->migrateLegacyLogo($company);
+
+        $contents = CompanyLogoStorage::contents($company);
+
+        if (! $contents) {
+            return null;
+        }
+
+        $mime = CompanyLogoStorage::mimeType($company);
+
+        return 'data:'.$mime.';base64,'.base64_encode($contents);
     }
 }

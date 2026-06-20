@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Products;
 
+use App\Models\MeasurementUnit;
+use App\Support\Tenant;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreProductRequest extends FormRequest
 {
@@ -15,7 +18,14 @@ class StoreProductRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'unit' => ['nullable', 'string', 'max:50'],
+            'unit_id' => [
+                'required_without:unit',
+                'nullable',
+                'integer',
+                Rule::exists(MeasurementUnit::class, 'id')
+                    ->where('company_id', Tenant::companyId($this)),
+            ],
+            'unit' => ['required_without:unit_id', 'nullable', 'string', 'max:50'],
             'cost_price' => ['required', 'numeric', 'min:0'],
             'sale_price' => ['required', 'numeric', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],

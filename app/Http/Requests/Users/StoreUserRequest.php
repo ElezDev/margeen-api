@@ -2,10 +2,9 @@
 
 namespace App\Http\Requests\Users;
 
-use App\Enums\Role as RoleEnum;
+use App\Support\Tenant;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Enum;
 
 class StoreUserRequest extends FormRequest
 {
@@ -16,7 +15,7 @@ class StoreUserRequest extends FormRequest
 
     public function rules(): array
     {
-        $companyId = $this->user()->company_id;
+        $companyId = Tenant::companyId($this);
 
         return [
             'name' => ['required', 'string', 'max:255'],
@@ -37,7 +36,12 @@ class StoreUserRequest extends FormRequest
             'address' => ['nullable', 'string', 'max:255'],
             'avatar_path' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:1000'],
-            'role' => ['required', new Enum(RoleEnum::class)],
+            'role' => [
+                'required',
+                'string',
+                Rule::exists('roles', 'name')->where('guard_name', 'api'),
+                Rule::notIn(['super_admin']),
+            ],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }

@@ -3,22 +3,33 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ImportSpreadsheetRequest;
 use App\Http\Requests\Products\StoreProductRequest;
 use App\Http\Requests\Products\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
+use App\Models\MeasurementUnit;
 use App\Models\Product;
+use App\Services\MeasurementUnitService;
+use App\Services\ProductImportService;
+use App\Support\Tenant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ProductController extends Controller
 {
+    public function __construct(
+        private readonly ProductImportService $productImportService,
+        private readonly MeasurementUnitService $measurementUnitService
+    ) {}
     public function index(Request $request): AnonymousResourceCollection
     {
         $this->authorize('viewAny', Product::class);
 
         $query = Product::query()
-            ->forCompany($request->user()->company_id)
+            ->forCompany(Tenant::companyId($request))
+            ->with('measurementUnit')
             ->orderBy('name');
 
         if ($request->boolean('active_only')) {
@@ -37,17 +48,48 @@ class ProductController extends Controller
 
     public function store(StoreProductRequest $request): JsonResponse
     {
+        $validated = $request->validated();
+        $companyId = Tenant::companyId($request);
+        $unit = $this->resolveUnit($companyId, $validated);
+
         $product = Product::query()->create([
-            ...$request->validated(),
-            'company_id' => $request->user()->company_id,
-            'unit' => $request->validated('unit') ?? 'unidad',
-            'is_active' => $request->validated('is_active') ?? true,
+            'name' => $validated['name'],
+            'unit_id' => $unit->id,
+            'unit' => $unit->name,
+            'cost_price' => $validated['cost_price'],
+            'sale_price' => $validated['sale_price'],
+            'company_id' => $companyId,
+            'is_active' => $validated['is_active'] ?? true,
         ]);
 
         return response()->json([
             'message' => 'Producto creado.',
-            'data' => ProductResource::make($product),
+            'data' => ProductResource::make($product->load('measurementUnit')),
         ], 201);
+    }
+
+    public function importTemplate(Request $request): BinaryFileResponse
+    {
+        $this->authorize('create', Product::class);
+
+        return response()
+            ->download($this->productImportService->templatePath(), 'plantilla-productos.xlsx')
+            ->deleteFileAfterSend();
+    }
+
+    public function import(ImportSpreadsheetRequest $request): JsonResponse
+    {
+        $this->authorize('create', Product::class);
+
+        $result = $this->productImportService->import(
+            Tenant::companyId($request),
+            $request->file('file')
+        );
+
+        return response()->json([
+            'message' => 'Importación de productos procesada.',
+            'data' => $result,
+        ]);
     }
 
     public function show(Request $request, Product $product): JsonResponse
@@ -64,11 +106,19 @@ class ProductController extends Controller
     {
         $this->ensureSameCompany($request, $product);
 
-        $product->update($request->validated());
+        $validated = $request->validated();
+
+        if (isset($validated['unit_id']) || isset($validated['unit'])) {
+            $unit = $this->resolveUnit(Tenant::companyId($request), $validated);
+            $validated['unit_id'] = $unit->id;
+            $validated['unit'] = $unit->name;
+        }
+
+        $product->update($validated);
 
         return response()->json([
             'message' => 'Producto actualizado.',
-            'data' => ProductResource::make($product),
+            'data' => ProductResource::make($product->fresh('measurementUnit')),
         ]);
     }
 
@@ -95,8 +145,28 @@ class ProductController extends Controller
 
     private function ensureSameCompany(Request $request, Product $product): void
     {
-        if ($product->company_id !== $request->user()->company_id) {
+        if (! Tenant::belongsToTenant($product, $request)) {
             abort(404);
         }
+    }
+
+    private function findUnit(int $companyId, int $unitId): MeasurementUnit
+    {
+        return MeasurementUnit::query()
+            ->forCompany($companyId)
+            ->whereKey($unitId)
+            ->firstOrFail();
+    }
+
+    private function resolveUnit(int $companyId, array $validated): MeasurementUnit
+    {
+        if (! empty($validated['unit_id'])) {
+            return $this->findUnit($companyId, (int) $validated['unit_id']);
+        }
+
+        return $this->measurementUnitService->resolveOrCreate(
+            $companyId,
+            $validated['unit'] ?? 'Unidad'
+        );
     }
 }

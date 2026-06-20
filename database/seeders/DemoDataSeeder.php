@@ -4,18 +4,32 @@ namespace Database\Seeders;
 
 use App\Models\Client;
 use App\Models\Company;
+use App\Models\MeasurementUnit;
 use App\Models\Product;
+use App\Services\MeasurementUnitService;
 use Illuminate\Database\Seeder;
 
 class DemoDataSeeder extends Seeder
 {
     public function run(): void
     {
-        $company = Company::query()->first();
+        $company = Company::query()->where('document', '900123456')->first();
 
         if (! $company) {
             return;
         }
+
+        app(MeasurementUnitService::class)->seedDefaultsForCompany($company->id);
+
+        $arroba = MeasurementUnit::query()
+            ->where('company_id', $company->id)
+            ->where('name', 'Arroba')
+            ->firstOrFail();
+
+        $galon = MeasurementUnit::query()
+            ->where('company_id', $company->id)
+            ->where('name', 'Galón')
+            ->firstOrFail();
 
         Client::query()->firstOrCreate(
             [
@@ -36,7 +50,8 @@ class DemoDataSeeder extends Seeder
                 'name' => 'Arroz premium',
             ],
             [
-                'unit' => 'arroba',
+                'unit_id' => $arroba->id,
+                'unit' => $arroba->name,
                 'cost_price' => 18000,
                 'sale_price' => 24000,
                 'is_active' => true,
@@ -49,7 +64,8 @@ class DemoDataSeeder extends Seeder
                 'name' => 'Aceite vegetal',
             ],
             [
-                'unit' => 'galón',
+                'unit_id' => $galon->id,
+                'unit' => $galon->name,
                 'cost_price' => 12000,
                 'sale_price' => 15500,
                 'is_active' => true,

@@ -25,6 +25,8 @@ enum Permission: string
     case UsersManage = 'users.manage';
     case CompanyManage = 'company.manage';
 
+    case PlatformManage = 'platform.manage';
+
     public static function values(): array
     {
         return array_column(self::cases(), 'value');

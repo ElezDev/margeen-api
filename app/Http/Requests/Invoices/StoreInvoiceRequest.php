@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Invoices;
 
+use App\Support\Tenant;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -14,7 +15,7 @@ class StoreInvoiceRequest extends FormRequest
 
     public function rules(): array
     {
-        $companyId = $this->user()->company_id;
+        $companyId = Tenant::companyId($this);
 
         return [
             'client_id' => [
